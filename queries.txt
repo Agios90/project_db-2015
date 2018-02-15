@@ -1,0 +1,50 @@
+select FirstName, LastName, Addr_StreetName as StreetName, Addr_StreetNo as StreetNumber
+from private_owners natural join properties;
+
+(select FirstName, LastName, Addr_StreetName as StreetName, Addr_StreetNo as StreetNumber
+from private_owners natural join properties)
+union
+(select ContactFirstName, ContactLastName, Addr_StreetName as StreetName, Addr_StreetNo as StreetNumber
+from business_owners natural join properties);
+
+(select min(salary), avg(salary), max(salary)
+from Employees where SupervisorAFM is null)
+union
+(select min(salary), avg(salary), max(salary)
+from Employees where SupervisorAFM is not null);
+
+select addr_Streetname as StreetName, addr_StreetNo as StreetNo, Description
+from Property_types natural join properties;
+
+select Description, avg(rent) as Rent
+from property_types natural join properties
+group by PropertyTypeId;
+
+select addr_streetname as StreetName, addr_streetno as StreetNumber, contracts.rent as Rent
+from contracts, properties
+where contracts.PropertyRegistrationNo = properties.PropertyRegistrationNo
+order by contracts.rent;
+
+select addr_streetname as StreetName, addr_StreetNo as StreetNumber, contracts.rent as ContractRent, properties.rent as PropertyRent
+from contracts,properties
+where contracts.PropertyRegistrationNo = properties.PropertyRegistrationNo
+having contracts.rent > properties.rent;
+
+select count(distinct(contracts.PropertyRegistrationNo)) as TotalContracts, count(distinct(properties.PropertyRegistrationNo)) as TotalProperties
+from contracts,properties;
+
+select count(*) as SuccessfulAdvertisments
+from advertisments natural join
+	(select contracts.propertyregistrationno
+	from properties,contracts
+	where contracts.PropertyRegistrationNo = properties.PropertyRegistrationNo) as temp;
+
+select temp.FirstName, temp.LastName, temp.addr_Streetname as StreetName, temp.addr_StreetNo as StreetNumber, visits.date as Date
+from visits,
+	(select contracts.clientregistrationno,contracts.propertyregistrationno, clients.FirstName, clients.LastName, properties.addr_Streetname, properties.addr_StreetNo
+	from contracts,properties,clients
+	where contracts.clientregistrationno = clients.clientregistrationno and contracts.propertyregistrationno = properties.propertyregistrationno) as temp
+where visits.propertyregistrationno = temp.propertyregistrationno AND visits.clientregistrationno = temp.clientregistrationno;
+
+
+

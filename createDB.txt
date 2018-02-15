@@ -1,0 +1,173 @@
+drop database my_project;
+create database my_project;
+use my_project;
+
+create table Employees (
+	AFM int unsigned not null primary key,
+	FirstName varchar(30) not null,
+	LastName varchar(30) not null,
+	addr_StreetName varchar(30) not null,
+	addr_StreetNo int unsigned not null,
+	addr_PostalCode int unsigned not null,
+	Salary decimal(13,3) not null,
+	PhoneNumber int unsigned not null,
+	SupervisorAFM int unsigned,
+	FOREIGN KEY (SupervisorAFM) REFERENCES Employees(AFM) ON UPDATE CASCADE ON DELETE SET NULL
+)ENGINE=INNODB;
+	
+create table Property_Types(
+	PropertyTypeId int unsigned not null auto_increment primary key,
+	Description varchar(100) not null,
+	Rooms int unsigned not null
+)ENGINE=INNODB;
+
+create table Clients (
+	ClientRegistrationNo int unsigned not null auto_increment primary key,
+	FirstName varchar(30) not null,
+	LastName varchar(30) not null,
+	addr_StreetName varchar(30) not null,
+	addr_StreetNo int unsigned not null,
+	addr_PostalCode int unsigned not null,
+	RegistrationDate date,
+	MaxRent int unsigned,
+	Active enum('Yes','No'),
+	RegisteredBy int unsigned,
+	PreferredTypeId int unsigned,
+	FOREIGN KEY (RegisteredBy) REFERENCES Employees(AFM) ON UPDATE CASCADE ON DELETE SET NULL,
+	FOREIGN KEY (PreferredTypeId) REFERENCES Property_Types(PropertyTypeId) ON UPDATE CASCADE ON DELETE SET NULL
+)ENGINE=INNODB;
+	
+create table Owners (
+	OwnerAFM int unsigned not null primary key,
+	addr_StreetName varchar(30) not null,
+	addr_StreetNo int unsigned not null,
+	addr_PostalCode int unsigned not null
+)ENGINE=INNODB;
+
+create table Private_Owners (
+	OwnerAFM int unsigned not null primary key,
+	PhoneNumber int unsigned not null,
+	FirstName varchar(30) not null,
+	LastName varchar(30) not null,
+	FOREIGN KEY (OwnerAFM) REFERENCES Owners(OwnerAFM) ON UPDATE CASCADE ON DELETE CASCADE
+)ENGINE=INNODB;
+
+create table Business_Owners(
+	OwnerAFM int unsigned not null primary key,
+	BusinessName varchar(30) not null,
+	BusinessType varchar(30),
+	PhoneNumber int unsigned not null,
+	ContactFirstName varchar(30) not null,
+	ContactLastName varchar(30) not null,
+	FOREIGN KEY (OwnerAFM) REFERENCES Owners(OwnerAFM) ON UPDATE CASCADE ON DELETE CASCADE
+)ENGINE=INNODB;
+
+create table Properties (
+	PropertyRegistrationNo int unsigned not null auto_increment primary key,
+	Addr_StreetName varchar(30) not null,
+	Addr_StreetNo int unsigned not null,
+	Addr_PostalCode int unsigned not null,
+	Size decimal(13,3) not null,
+	Floor int unsigned not null,
+	Rent decimal(13,3) unsigned,
+	PropertyTypeId int unsigned,
+	ManagerAFM int unsigned,
+	OwnerAFM int unsigned,
+	FOREIGN KEY (PropertyTypeId) REFERENCES Property_Types(PropertyTypeId) ON UPDATE CASCADE ON DELETE SET NULL,
+	FOREIGN KEY (ManagerAFM) REFERENCES Employees(AFM) ON UPDATE CASCADE ON DELETE SET NULL,
+	FOREIGN KEY (OwnerAFM) REFERENCES Owners(OwnerAFM) ON UPDATE CASCADE ON DELETE SET NULL
+)ENGINE=INNODB;
+
+create table Contracts (
+	ContractNo int unsigned not null auto_increment primary key,
+	Rent decimal(13,3) not null,
+	PaymentType enum('Cash','Check'),
+	RentStart date,
+	RentFinish date,
+	ClientRegistrationNo int unsigned not null,
+	PropertyRegistrationNo int unsigned not null,
+	FOREIGN KEY (ClientRegistrationNo) REFERENCES Clients(ClientRegistrationNo) ON UPDATE CASCADE,
+	FOREIGN KEY (PropertyRegistrationNo) REFERENCES Properties(PropertyRegistrationNo) ON UPDATE CASCADE
+)ENGINE=INNODB;
+
+create table Visits (
+	ClientRegistrationNo int unsigned not null,
+	PropertyRegistrationNo int unsigned not null,
+	Date date,
+	FOREIGN KEY (ClientRegistrationNo) REFERENCES Clients(ClientRegistrationNo) ON UPDATE CASCADE ON DELETE CASCADE,
+	FOREIGN KEY (PropertyRegistrationNo) REFERENCES Properties(PropertyRegistrationNo) ON UPDATE CASCADE ON DELETE CASCADE,
+	primary key (ClientRegistrationNo,PropertyRegistrationNo)
+)ENGINE=INNODB;
+
+create table Newspapers (
+	NewspaperId int unsigned not null auto_increment primary key,
+	NewspaperName varchar(30) not null
+)ENGINE=INNODB;
+
+create table Advertisments(
+	AdvertismentId int unsigned not null auto_increment primary key,
+	DateOfPublish date not null,
+	PropertyRegistrationNo int unsigned not null,
+	NewspaperId int unsigned not null,
+	Cost decimal(13,3),
+	Duration int unsigned,
+	FOREIGN KEY (PropertyRegistrationNo) REFERENCES Properties(PropertyRegistrationNo) ON UPDATE CASCADE ON DELETE CASCADE,
+	FOREIGN KEY (NewspaperId) REFERENCES Newspapers(NewspaperId) ON UPDATE CASCADE ON DELETE CASCADE
+)ENGINE=INNODB;
+
+
+/*mh enhmerwsimh: αριθμός πελατών που προτιμούν το κάθε είδος σπιτιού*/
+CREATE VIEW view1 (description, zitisi)
+AS
+select Description, COUNT(*)
+from Property_Types p, Clients c
+where p.PropertyTypeId = c.PreferredTypeId
+group by Description ;
+
+
+/*enhmerwsimh: ποιοί πελάτες είναι active*/
+CREATE VIEW view2 (FirstName,LastName,RegistrationDate,Active) 
+AS
+select FirstName,LastName,RegistrationDate,Active
+from Clients
+where Active="Yes";
+
+CREATE INDEX employee_index
+ON Employees(LastName);
+
+CREATE INDEX client_index
+ON Clients(LastName);
+
+delimiter //
+
+create trigger date_trigger before insert on Contracts
+	for each row
+	begin
+		declare msg varchar(255);
+		if (new.RentFinish < new.RentStart) then
+			set msg = 'Error on table Contracts : Rent must finish later than the day it starts';
+			signal sqlstate '45000' set message_text = msg;
+		end if;
+	end
+//
+
+create trigger employee_trigger before update on Employees
+	for each row
+	begin
+		declare msg varchar(255);
+		if ((new.SupervisorAFM IS NULL) and (old.SupervisorAFM > 0) and (old.Salary > new.Salary)) then
+			set msg = 'Error on table Employees : Promoted employees must receive a higher salary';
+			signal sqlstate '45000' set message_text = msg;
+		end if;
+	end
+//
+
+create trigger client_trigger after insert on Contracts
+	for each row
+	begin
+		update Clients set Active='Yes' where ClientRegistrationNo=new.ClientRegistrationNo;
+	end
+//	
+
+delimiter ;
+

@@ -1,0 +1,130 @@
+use my_project;
+
+delete from Employees;
+delete from Property_Types;
+delete from Clients;
+delete from Owners;
+delete from Private_Owners;
+delete from Business_Owners ;
+delete from Properties ;
+delete from Contracts ;
+delete from Visits ;
+delete from Newspapers ;
+delete from Advertisments ;
+
+
+alter table Employees auto_increment=1;
+alter table Property_Types auto_increment=1;
+alter table Clients auto_increment=1;
+alter table Properties auto_increment=1;
+alter table Contracts auto_increment=1;
+alter table Visits auto_increment=1;
+alter table Newspapers auto_increment=1;
+alter table Advertisments auto_increment=1;
+
+
+insert into Property_Types(PropertyTypeId, Description, Rooms) values
+(null,'Garsoniera',1),
+(null,'Dyari',2),
+(null,'Triari',3),
+(null,'Tessari',4),
+(null,'Garage',1);
+
+
+
+insert into Employees(AFM, FirstName,LastName, addr_StreetName,addr_StreetNo,addr_PostalCode,Salary,PhoneNumber,SupervisorAFM) values
+('244891','Ned','Stark','Laskaridou','22','17676','2000','46823670', null),
+('471290','Catelyn','Tully','Kremou','45','18743','2500','27016385', null),
+('570922','Jaime','Lannister','Papagou','112','19822','3000','47925150', null),
+('974500','Cersei','Lannister','Kolokotroni','89','85628','2200','62981490', null),
+('288311','Stannis','Baratheon','Aleksandreias','33','78120','1900','14945829', null),
+('689541','Robert','Baratheon','Themistokleous','44','20987','2200','51390567','974500'),
+('394273','Margaery','Tyrell','Sivitanidou','90','97452','2900','58924519','974500'),
+('536201','Daenerys','Targaryen','Filaretou','22','34087','1400','52803589','689541'),
+('309812','Davos','Seaworth','3is Septemvriou','98','65922','1200','28901754','288311'),
+('462382','Oberyn','Martell','Syntagmatos','24','72299','2200','68245901','974500');
+
+
+insert into Clients(ClientRegistrationNo,FirstName,LastName,addr_StreetName,addr_StreetNo,addr_PostalCode,RegistrationDate,MaxRent,Active,RegisteredBy,PreferredTypeId) values
+(null,'Sansa','Stark','Laskaridou','22','17676','2010-12-12','500','Yes','244891','1'),
+(null,'Arya','Stark','Kremou','45','18743','2014-6-12','420','Yes','244891','3'),
+(null,'Loras','Tyrell','Sivitanidou','90','97452','2013-10-12','750','Yes','471290','2'),
+(null,'Joffrey','Lannister','Kolokotroni','89','85628','2012-8-12','500','Yes','471290','4'),
+(null,'Myrcella','Baratheon','Filaretou','22','34087','2015-7-12','1200','Yes','689541','1'),
+(null,'John','Snow','3is Septemvriou','98','65922','2011-1-12','600','Yes','689541','2'),
+(null,'Tommen','Baratheon','Aleksandreias','33','78120','2012-2-12','400','No','689541','3'),
+(null,'Asha','Greyjoy','Syntagmatos','24','72299','2014-4-12','550','No','536201','5'),
+(null,'Khal','Drogo','Themistokleous','44','20987','2013-5-12','700','No','536201','4');
+
+
+insert into Owners(OwnerAFM, addr_StreetName,addr_StreetNo,addr_PostalCode) values
+('472390','Aleksandreias','33','78120'),
+('578932','Filaretou','22','34087'),
+('905781','Laskaridou','22','17676'),
+('579123','Sivitanidou','90','97452'),
+('390461','3is Septemvriou','98','65922'),
+('214622','Syntagmatos','24','72299');
+
+
+
+insert into Business_Owners(OwnerAFM,BusinessName,BusinessType,PhoneNumber,ContactFirstName,ContactLastName) values
+('472390','Castle Rock','Enexyrodaneisthrio','64247156','Tyrion','Lannister'),
+('578932','Winterfell','Skylotrofeio','42078371','Maester','Aemon'),
+('905781','Highgarden','Anthopwleio','89367190','Olenna','Tyrell');
+
+
+
+insert into Private_Owners(OwnerAFM,PhoneNumber,FirstName,LastName) values
+('579123','62975178','Jorah','Mormont'),
+('390461','78419752','Rhaegar','Targaryen'),
+('214622','71459714','Petyr','Baelish');
+
+
+insert into Properties(PropertyRegistrationNo, Addr_StreetName, Addr_StreetNo, Addr_PostalCode,Size,Floor,Rent,PropertyTypeId,ManagerAFM,OwnerAFM) values
+(null,'Laskaridou','87','17676','105','1','420','1','244891','472390'),
+(null,'Kremou','112','19062','82','3','500','2','244891','578932'),
+(null,'Sapfous','76','18752','71','3','450','4','974500','579123'),
+(null,'Eleutheriou Venizelou','91','15678','67','1','330','2','244891','390461'),
+(null,'Esperidwn','19','42042','132','0','670','3','536201','472390'),
+(null,'Sofokleous','245','13377','52','1','550','2','974500','578932'),
+(null,'Lykourgou','4','64128','98','5','890','1','536201','905781'),
+(null,'28is Oktovriou','58','21095','87','4','285','5','974500','214622');
+
+
+
+insert into Contracts(ContractNo,Rent,PaymentType,RentStart,RentFinish, ClientRegistrationNo,PropertyRegistrationNo) values
+(null,'420','Cash','2014-10-4','2015-10-14','1','3'),
+(null,'500','Check','2011-5-22','2015-2-4','2','1'),
+(null,'450','Cash','2012-4-20','2016-11-5','3','6'),
+(null,'330','Cash','2015-3-6','2016-3-21','4','5'),
+(null,'670','Check','2012-6-17','2016-6-30','5','2'),
+(null,'550','Check','2014-11-16','2015-8-9','6','4');
+
+
+insert into Visits(ClientRegistrationNo,PropertyRegistrationNo,Date) values
+('2','1','2014-9-29'),
+('1','2','2011-2-1'),
+('5','3','2012-4-19'),
+('1','4','2015-2-25'),
+('3','5','2012-5-11'),
+('2','6','2014-10-24');
+
+
+
+insert into Newspapers(NewspaperId, NewspaperName) values
+(null,'Ta Nea'),
+(null,'To Thema'),
+(null,'To Vima'),
+(null,'Kathimerini'),
+(null,'Mprizospastis'),
+(null,'Eleutherotypia');
+
+
+insert into Advertisments(AdvertismentId,DateOfPublish,PropertyRegistrationNo,NewspaperId,Cost,Duration) values
+(null,'2011-11-5','1','2','150','10'),
+(null,'2010-9-30','3','1','420','25'),
+(null,'2013-12-22','4','4','180','20'),
+(null,'2012-6-9','5','3','220','25'),
+(null,'2010-5-13','2','5','330','15');
+
+
